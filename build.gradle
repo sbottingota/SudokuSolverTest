@@ -1,9 +1,14 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.9.23'
+    id 'application'
 }
 
 group = 'com.sbottingota.sudokusolvertest'
 version = '1.0-SNAPSHOT'
+
+application {
+    mainClass = 'com.sbottingota.sudokusolvertest.MainKt'
+}
 
 repositories {
     mavenCentral()
