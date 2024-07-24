@@ -1,6 +1,12 @@
 package com.sbottingota.sudokusolvertest.game
 
-class SudokuState(val board: Array<Array<Int>>) {
+import java.util.*
+
+class Game(val board: Array<Array<Int>>) {
+    private val moveHistory: Stack<Move> = Stack()
+    var nMoves = 0
+        private set
+
     init {
         if (board.isEmpty()) {
             throw IllegalArgumentException("'board' must have dimensions ${BOARD_SIDE_LENGTH}x${BOARD_SIDE_LENGTH}, but was empty")
@@ -23,38 +29,64 @@ class SudokuState(val board: Array<Array<Int>>) {
     }
 
     /**
-     * @param x The x coord for the new move.
-     * @param y The y coord for the new move.
-     * @param newVal The new value to assign `board[x][y]` for the returned copy of the game state.
-     * @return A copy of the current state, with the appropriate move carried out.
+     * @param x The x coord for the move.
+     * @param y The y coord of the move.
+     * @param newVal The value to put at the specified position.
+     * @throws IllegalArgumentException If the move is not valid.
      */
-    fun moved(x: Int, y: Int, newVal: Int): SudokuState {
-        if (newVal == EMPTY_SQUARE_VALUE) {
-            throw IllegalArgumentException("Cannot assign square to $EMPTY_SQUARE_VALUE, as that denotes an empty square")
-        } else if (board[x][y] != EMPTY_SQUARE_VALUE) {
-            throw IllegalArgumentException("Tried to assign value to square which was not empty")
+    fun move(x: Int, y: Int, newVal: Int) {
+        move(Move(x, y, newVal))
+    }
+
+    /**
+     * @param move The move to apply.
+     * @return A copy of the current state, with the appropriate move carried out.
+     * @throws IllegalArgumentException If the move is not valid.
+     */
+    fun move(move: Move) {
+        if (!isValidMove(move)) {
+            throw IllegalArgumentException("Invalid move")
         }
 
-        val newBoard = board.map { it.clone() }.toTypedArray()
-        newBoard[x][y] = newVal
+        board[move.x][move.y] = move.newVal
+        moveHistory.push(move)
+        nMoves++;
+    }
 
-        return SudokuState(newBoard)
+    /**
+     * Reverses the last move
+     * @throws EmptyStackException If there is no previous state.
+     */
+    fun unmove() {
+        val lastMove = moveHistory.pop()
+        board[lastMove.x][lastMove.y] = EMPTY_SQUARE_VALUE
+        nMoves--;
+    }
+
+    private fun isValidMove(move: Move): Boolean {
+        if (board[move.x][move.y] != EMPTY_SQUARE_VALUE) return false
+
+        // temporarily apply changes to see if they are valid
+        board[move.x][move.y] = move.newVal
+        val ret = isValidBoard(board)
+        board[move.x][move.y] = EMPTY_SQUARE_VALUE
+
+        return ret
     }
 
     /**
      * @return A list of all the possible valid moves from this state.
      */
-    fun getPossibleMoves(): List<SudokuState> {
-        val possibleMoves = mutableListOf<SudokuState>()
+    fun getPossibleMoves(): List<Move> {
+        val possibleMoves = mutableListOf<Move>()
 
         for (x in 0..<BOARD_SIDE_LENGTH) {
             for (y in 0..<BOARD_SIDE_LENGTH) {
                 for (newVal in 1..BOARD_SIDE_LENGTH) {
-                    try {
-                        val move = moved(x, y, newVal)
+                    val move = Move(x, y, newVal)
+                    if (isValidMove(move)) {
                         possibleMoves.add(move)
-                    } catch (_: IllegalArgumentException) {
-                    } // skip invalid moves
+                    }
                 }
             }
         }
@@ -74,7 +106,7 @@ class SudokuState(val board: Array<Array<Int>>) {
     }
 
     override fun equals(other: Any?): Boolean {
-        if (other !is SudokuState) return false
+        if (other !is Game) return false
 
         return board.contentDeepEquals(other.board)
     }
@@ -86,7 +118,7 @@ class SudokuState(val board: Array<Array<Int>>) {
     companion object {
 
         /**
-         * Check if a board is valid (there is at most one number per row, column, or box.
+         * Check if a board is valid (there is at most one number per row, column, or box).
          * @param board The board checked (assumed to be the right dimensions).
          * @return Whether the board is valid.
          */
@@ -132,6 +164,34 @@ class SudokuState(val board: Array<Array<Int>>) {
             }
 
             return true
+        }
+    }
+
+    data class Move(val x: Int, val y: Int, val newVal: Int) {
+        init {
+            if (x !in 0..<BOARD_SIDE_LENGTH) {
+                throw IllegalArgumentException("'x' must be between 0 and ${BOARD_SIDE_LENGTH - 1} (inclusive), but was $x")
+            }
+
+            if (y !in 0..<BOARD_SIDE_LENGTH) {
+                throw IllegalArgumentException("'y' must be between 0 and ${BOARD_SIDE_LENGTH - 1} (inclusive), but was $y")
+            }
+
+            if (newVal !in 1..BOARD_SIDE_LENGTH) {
+                throw IllegalArgumentException("'newVal' must be between 1 and $BOARD_SIDE_LENGTH (inclusive), but was $newVal")
+            }
+        }
+
+        override fun equals(other: Any?): Boolean {
+            if (other !is Move) return false
+            return x == other.x && y == other.y && newVal == other.newVal
+        }
+
+        override fun hashCode(): Int {
+            var result = x
+            result = 31 * result + y
+            result = 31 * result + newVal
+            return result
         }
     }
 }
