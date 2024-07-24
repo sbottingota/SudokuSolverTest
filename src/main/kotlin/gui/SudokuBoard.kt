@@ -62,7 +62,7 @@ class SudokuBoard : JPanel() {
     /**
      * @return The board, represented as a matrix.
      */
-    fun getBoard(): Array<Array<Int>> {
+    fun getBoardValues(): Array<Array<Int>> {
         val ret = Array(BOARD_SIDE_LENGTH) { Array(BOARD_SIDE_LENGTH) { 0 } } // init matrix of 0s
 
         for ((i, row) in board.withIndex()) {
@@ -74,6 +74,21 @@ class SudokuBoard : JPanel() {
         }
 
         return ret
+    }
+
+    /**
+     * Set the board to match the passed in matrix.
+     */
+    fun setBoardValues(newBoard: Array<Array<Int>>) {
+        if (newBoard.size != BOARD_SIDE_LENGTH || newBoard[0].size != BOARD_SIDE_LENGTH) {
+            throw IllegalArgumentException("'newBoard' must be of dimensions ${BOARD_SIDE_LENGTH}x${BOARD_SIDE_LENGTH}")
+        }
+
+        for (i in 0..<BOARD_SIDE_LENGTH) {
+            for (j in 0..<BOARD_SIDE_LENGTH) {
+                board[i][j].text = newBoard[i][j].toString()
+            }
+        }
     }
 
     /**
