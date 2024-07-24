@@ -62,6 +62,27 @@ class SudokuState(val board: Array<Array<Int>>) {
         return possibleMoves
     }
 
+    /**
+     * @return If the state is fully solved; i.e. if there are no blank spaces.
+     */
+    fun isSolved(): Boolean {
+        for (row in board) {
+            if (row.contains(EMPTY_SQUARE_VALUE)) return false
+        }
+
+        return true
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is SudokuState) return false
+
+        return board.contentDeepEquals(other.board)
+    }
+
+    override fun hashCode(): Int {
+        return board.contentDeepHashCode()
+    }
+
     companion object {
 
         /**
