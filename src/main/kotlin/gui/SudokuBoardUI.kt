@@ -9,7 +9,7 @@ import javax.swing.JPanel
 import javax.swing.JTextField
 import javax.swing.SwingUtilities
 
-class SudokuBoard : JPanel() {
+class SudokuBoardUI : JPanel() {
     private val board: Array<Array<JTextField>>;
 
     init {

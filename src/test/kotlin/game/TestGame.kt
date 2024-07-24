@@ -2,7 +2,6 @@ package game
 
 import com.sbottingota.sudokusolvertest.game.BOARD_SIDE_LENGTH
 import com.sbottingota.sudokusolvertest.game.Game
-import com.sbottingota.sudokusolvertest.game.Game.Move
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
@@ -141,20 +140,20 @@ class TestGame {
             )
         )
 
-        val moves = mutableListOf<Array<Move>>()
+        val moves = mutableListOf<Array<Array<Int>>>()
         moves.add(
             arrayOf(
-                Move(0, 0, 2),
-                Move(5, 3, 3),
-                Move(7, 1, 3)
+                arrayOf(0, 0, 2),
+                arrayOf(5, 3, 3),
+                arrayOf(7, 1, 3)
             )
         )
 
         moves.add(
             arrayOf(
-                Move(0, 0, 2),
-                Move(2, 6, 6),
-                Move(7, 7, 8)
+                arrayOf(0, 0, 2),
+                arrayOf(2, 6, 6),
+                arrayOf(7, 7, 8)
             )
         )
 
@@ -241,10 +240,10 @@ class TestGame {
         for ((i, board) in states.withIndex()) {
             for ((j, move) in moves[i].withIndex()) {
                 val state = Game(board)
-                state.move(move)
-                assertTrue(state.board.contentDeepEquals(expectedOutput[i][j]))
-                state.unmove()
-                assertTrue((state.board.contentDeepEquals(board)))
+                state.move(move[0], move[1], move[2])
+                assertTrue(state.getBoard().contentDeepEquals(expectedOutput[i][j]))
+                state.clear(move[0], move[1])
+                assertTrue((state.getBoard().contentDeepEquals(board)))
             }
         }
     }

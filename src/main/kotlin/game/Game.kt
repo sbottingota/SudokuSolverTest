@@ -1,12 +1,6 @@
 package com.sbottingota.sudokusolvertest.game
 
-import java.util.*
-
-class Game(val board: Array<Array<Int>>) {
-    private val moveHistory: Stack<Move> = Stack()
-    var nMoves = 0
-        private set
-
+class Game(private val board: Array<Array<Int>>) {
     init {
         if (board.isEmpty()) {
             throw IllegalArgumentException("'board' must have dimensions ${BOARD_SIDE_LENGTH}x${BOARD_SIDE_LENGTH}, but was empty")
@@ -35,63 +29,29 @@ class Game(val board: Array<Array<Int>>) {
      * @throws IllegalArgumentException If the move is not valid.
      */
     fun move(x: Int, y: Int, newVal: Int) {
-        move(Move(x, y, newVal))
-    }
-
-    /**
-     * @param move The move to apply.
-     * @return A copy of the current state, with the appropriate move carried out.
-     * @throws IllegalArgumentException If the move is not valid.
-     */
-    fun move(move: Move) {
-        if (!isValidMove(move)) {
+        if (!isValidMove(x, y, newVal)) {
             throw IllegalArgumentException("Invalid move")
         }
 
-        board[move.x][move.y] = move.newVal
-        moveHistory.push(move)
-        nMoves++;
+        board[x][y] = newVal
     }
 
     /**
-     * Reverses the last move
-     * @throws EmptyStackException If there is no previous state.
+     * Clears the specified square.
      */
-    fun unmove() {
-        val lastMove = moveHistory.pop()
-        board[lastMove.x][lastMove.y] = EMPTY_SQUARE_VALUE
-        nMoves--;
+    fun clear(x: Int, y: Int) {
+        board[x][y] = EMPTY_SQUARE_VALUE
     }
 
-    private fun isValidMove(move: Move): Boolean {
-        if (board[move.x][move.y] != EMPTY_SQUARE_VALUE) return false
+    private fun isValidMove(x: Int, y: Int, newVal: Int): Boolean {
+        if (board[x][y] != EMPTY_SQUARE_VALUE) return false
 
         // temporarily apply changes to see if they are valid
-        board[move.x][move.y] = move.newVal
+        board[x][y] = newVal
         val ret = isValidBoard(board)
-        board[move.x][move.y] = EMPTY_SQUARE_VALUE
+        board[x][y] = EMPTY_SQUARE_VALUE
 
         return ret
-    }
-
-    /**
-     * @return A list of all the possible valid moves from this state.
-     */
-    fun getPossibleMoves(): List<Move> {
-        val possibleMoves = mutableListOf<Move>()
-
-        for (x in 0..<BOARD_SIDE_LENGTH) {
-            for (y in 0..<BOARD_SIDE_LENGTH) {
-                for (newVal in 1..BOARD_SIDE_LENGTH) {
-                    val move = Move(x, y, newVal)
-                    if (isValidMove(move)) {
-                        possibleMoves.add(move)
-                    }
-                }
-            }
-        }
-
-        return possibleMoves
     }
 
     /**
@@ -105,18 +65,14 @@ class Game(val board: Array<Array<Int>>) {
         return true
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (other !is Game) return false
-
-        return board.contentDeepEquals(other.board)
-    }
-
-    override fun hashCode(): Int {
-        return board.contentDeepHashCode()
+    /**
+     * @return A copy of the board, as an int matrix.
+     */
+    fun getBoard(): Array<Array<Int>> {
+        return board.copyOf() // copy so that board cannot be updated from outside the class
     }
 
     companion object {
-
         /**
          * Check if a board is valid (there is at most one number per row, column, or box).
          * @param board The board checked (assumed to be the right dimensions).
@@ -164,34 +120,6 @@ class Game(val board: Array<Array<Int>>) {
             }
 
             return true
-        }
-    }
-
-    data class Move(val x: Int, val y: Int, val newVal: Int) {
-        init {
-            if (x !in 0..<BOARD_SIDE_LENGTH) {
-                throw IllegalArgumentException("'x' must be between 0 and ${BOARD_SIDE_LENGTH - 1} (inclusive), but was $x")
-            }
-
-            if (y !in 0..<BOARD_SIDE_LENGTH) {
-                throw IllegalArgumentException("'y' must be between 0 and ${BOARD_SIDE_LENGTH - 1} (inclusive), but was $y")
-            }
-
-            if (newVal !in 1..BOARD_SIDE_LENGTH) {
-                throw IllegalArgumentException("'newVal' must be between 1 and $BOARD_SIDE_LENGTH (inclusive), but was $newVal")
-            }
-        }
-
-        override fun equals(other: Any?): Boolean {
-            if (other !is Move) return false
-            return x == other.x && y == other.y && newVal == other.newVal
-        }
-
-        override fun hashCode(): Int {
-            var result = x
-            result = 31 * result + y
-            result = 31 * result + newVal
-            return result
         }
     }
 }

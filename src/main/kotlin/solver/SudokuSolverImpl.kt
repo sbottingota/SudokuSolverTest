@@ -4,12 +4,8 @@ import com.sbottingota.sudokusolvertest.game.BOARD_SIDE_LENGTH
 import com.sbottingota.sudokusolvertest.game.EMPTY_SQUARE_VALUE
 import com.sbottingota.sudokusolvertest.game.Game
 
-class StateSolver {
-    /**
-     * @param game The game to solve.
-     * @return Whether the function managed to successfully solve the game.
-     */
-    fun solve(game: Game): Boolean {
+class SudokuSolverImpl : SudokuSolver {
+    override fun solve(game: Game): Boolean {
         if (game.isSolved()) return true
 
         val (x, y) = findEmptySquare(game)!!
@@ -18,13 +14,13 @@ class StateSolver {
             try {
                 game.move(x, y, newVal)
 
-                if (solve(game)) {
+                if (solve(game)) { // stack overflow error; TODO: fix
                     return true
                 }
 
-                game.unmove()
-            } catch (_: IllegalArgumentException) {}
-
+                game.clear(x, y)
+            } catch (_: IllegalArgumentException) {
+            }
 
         }
 
@@ -39,7 +35,7 @@ class StateSolver {
     private fun findEmptySquare(game: Game): Pair<Int, Int>? {
         for (x in 0..<BOARD_SIDE_LENGTH) {
             for (y in 0..<BOARD_SIDE_LENGTH) {
-                if (game.board[x][y] == EMPTY_SQUARE_VALUE) return Pair(x, y)
+                if (game.getBoard()[x][y] == EMPTY_SQUARE_VALUE) return Pair(x, y)
             }
         }
 

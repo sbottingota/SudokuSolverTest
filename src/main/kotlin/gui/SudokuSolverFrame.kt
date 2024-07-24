@@ -1,7 +1,7 @@
 package com.sbottingota.sudokusolvertest.gui
 
 import com.sbottingota.sudokusolvertest.game.Game
-import com.sbottingota.sudokusolvertest.solver.StateSolver
+import com.sbottingota.sudokusolvertest.solver.SudokuSolverImpl
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import javax.swing.JButton
@@ -9,7 +9,7 @@ import javax.swing.JFrame
 
 class SudokuSolverFrame : JFrame("Sudoku Solver") {
     init {
-        val board = SudokuBoard()
+        val board = SudokuBoardUI()
 
         val solveButton = JButton("Solve")
         val clearButton = JButton("Clear")
@@ -39,8 +39,8 @@ class SudokuSolverFrame : JFrame("Sudoku Solver") {
         setSize(WINDOW_SIZE, WINDOW_SIZE)
     }
 
-    fun solve(board: SudokuBoard) {
-        val solver = StateSolver()
+    private fun solve(board: SudokuBoardUI) {
+        val solver = SudokuSolverImpl()
 
         val game: Game
         try {
@@ -50,6 +50,6 @@ class SudokuSolverFrame : JFrame("Sudoku Solver") {
         }
         solver.solve(game)
 
-        board.setBoardValues(game.board)
+        board.setBoardValues(game.getBoard())
     }
 }
